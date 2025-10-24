@@ -10,10 +10,4 @@ public class ClientesEmisores extends Thread {
     public void run(){
         System.out.println("== Mensaje de inicio ==");
     }
-
-    
-
-
-
-    
 }
