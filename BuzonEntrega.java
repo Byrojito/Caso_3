@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 
-
 public class BuzonEntrega {
     private ArrayList<Correo> buzonEntrega = new ArrayList<>();
     private int capacidad;
@@ -18,13 +17,11 @@ public class BuzonEntrega {
                     return; 
                 }
             }
-
-            Thread.yield();
+            Thread.yield(); // AÑADIR yield para espera semi-activa
         }
     }
 
-   
-    public synchronized Correo recibirCorreo(){
+    public Correo recibirCorreo(){
         Correo c = null;
         while(c == null) {
             synchronized(this) {
@@ -32,11 +29,11 @@ public class BuzonEntrega {
                     c = buzonEntrega.remove(0);
                 }
             }
-       
+            // AÑADIR yield para espera semi-activa
+            if (c == null) {
+                Thread.yield();
+            }
         }
         return c;
     }
-
-
-    
 }

@@ -1,5 +1,4 @@
 import java.util.Random;
-import java.util.random.*;
 
 public class ClientesEmisores extends Thread {
     private long id_cli;
@@ -17,20 +16,17 @@ public class ClientesEmisores extends Thread {
     }
 
     public void run(){
-        boolean flag = rand.nextBoolean();
         System.out.println("== Mensaje de inicio ==");
-        Correo ini = new Correo(id_cli+"-"+0, flag, true, false, 0);
+        Correo ini = new Correo(id_cli+"-"+0, rand.nextBoolean(), true, false, 0);
         buzonEntrada.enviarCorreo(ini);
 
         for(int i = 0; i < numCorreos-2; i++){
-            Correo c = new Correo(id_cli+"-"+i+1, flag, false, false, 0);
-            // poner buzon entrada y agragar el correo
+            Correo c = new Correo(id_cli+"-"+i+1, rand.nextBoolean(), false, false, 0);
             buzonEntrada.enviarCorreo(c);
         }
         System.out.println("== Mensaje de fin ==");
-        Correo fin = new Correo(id_cli+"-"+numCorreos, flag, false, true, 0);
+        Correo fin = new Correo(id_cli+"-"+numCorreos, rand.nextBoolean(), false, true, 0);
         buzonEntrada.enviarCorreo(fin);
-
     }
 
     public long getid_cli(){

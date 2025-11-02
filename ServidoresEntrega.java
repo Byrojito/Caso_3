@@ -8,23 +8,23 @@ public class ServidoresEntrega extends Thread {
     }
 
     public void run(){
-        boolean cas = false;
-        while(cas == false){
+        while(true){
             Correo c = buzonEntrega.recibirCorreo();
-            if(c.Cofinal() == false){
-                leerCorreo(c);
-            } else{
-                System.out.println("=== Se ha terminado de leer ===");
+            // MODIFICAR esta condición
+            if(c.getId().equals("FIN")){ // Solo terminar con el FIN artificial
+                System.out.println("=== Servidor de entrega finalizado ===");
                 return;
+            } else if(c.Cofinal()) {
+                // Ignorar los mensajes de fin de clientes, seguir procesando
+                leerCorreo(c);
+            } else {
+                leerCorreo(c);
             }
-
         }
-
     }
 
     public void leerCorreo(Correo correo){
         correos.add(correo);
+        System.out.println("Servidor leyó: " + correo.getId());
     }
-
-    
 }

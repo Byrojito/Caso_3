@@ -17,13 +17,16 @@ public class FiltrosSpam extends Thread {
         this.buzonEntrada = buzonEntrada;
     }
 
-    // FiltrosSpam.java
-
     public void run(){
-        
-        
-        while(finClientesRecibidos < numClientesEmisores){
-            Correo correo = buzonEntrada.analizarSpam(); 
+        while(true){
+            Correo correo = buzonEntrada.analizarSpam();
+            
+            // AÑADIR esta verificación
+            if (correo == null) {
+                System.out.println("=== Filtro Spam - finalizado (no hay más correos) ===");
+                return;
+            }
+            
             correo.setflagSpam(); 
 
             if(correo.coIncial()){
@@ -34,7 +37,6 @@ public class FiltrosSpam extends Thread {
                 
                 boolean soyElResponsableDeCerrar = false;
                 
-                // Usamos un bloque 'synchronized' para proteger la variable estática
                 synchronized(FiltrosSpam.class) {
                     finClientesRecibidos++;
                     if (finClientesRecibidos == numClientesEmisores) {
@@ -43,7 +45,6 @@ public class FiltrosSpam extends Thread {
                 }
                 
                 if(soyElResponsableDeCerrar) {
-                   
                     System.out.println("--- Filtro Responsable: Esperando a que BuzonCuarentena se vacíe...");
                     
                     while (buzonCuarentena.getSize() > 0) {
@@ -59,6 +60,7 @@ public class FiltrosSpam extends Thread {
                     }
                     
                     buzonCuarentena.enviarCorreoSpam(fin);
+                    buzonEntrada.terminarProduccion(); // AÑADIR esta línea
                 }
                 
             } else if(correo.getflagSpam() == false){
@@ -69,11 +71,6 @@ public class FiltrosSpam extends Thread {
                 correo.setcuarentenaTiempo(t);
                 buzonCuarentena.enviarCorreoSpam(correo);
             }
-            
-           
         }
-        
-        System.out.println("=== Filtro Spam - finalizado ===");
     }
- 
 }
