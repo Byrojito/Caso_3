@@ -20,12 +20,12 @@ public class ClientesEmisores extends Thread {
         Correo ini = new Correo(id_cli+"-"+0, rand.nextBoolean(), true, false, 0);
         buzonEntrada.enviarCorreo(ini);
 
-        for(int i = 0; i < numCorreos-2; i++){
-            Correo c = new Correo(id_cli+"-"+i+1, rand.nextBoolean(), false, false, 0);
+        for(int i = 1; i < numCorreos-1; i++){
+            Correo c = new Correo(id_cli+"-"+i, rand.nextBoolean(), false, false, 0);
             buzonEntrada.enviarCorreo(c);
         }
         System.out.println("== Mensaje de fin ==");
-        Correo fin = new Correo(id_cli+"-"+numCorreos, rand.nextBoolean(), false, true, 0);
+        Correo fin = new Correo(id_cli+"-"+(numCorreos-1), rand.nextBoolean(), false, true, 0);
         buzonEntrada.enviarCorreo(fin);
     }
 

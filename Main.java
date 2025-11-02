@@ -43,40 +43,32 @@ public class Main {
             return;
         }
         
-        // --- 3. Inicialización de Buzones ---
+        // Buzones
         BuzonEntrada buzonEntrada = new BuzonEntrada(capacidadEntrada);
         BuzonCuarentena buzonCuarentena = new BuzonCuarentena();
         
-        // Nota: Se pasa un ArrayList vacío a BuzonEntrega como requiere tu constructor
         BuzonEntrega buzonEntrega = new BuzonEntrega(capacidadEntrega, new ArrayList<Correo>()); 
-        
-        // --- 4. Creación y Lanzamiento de Threads ---
-        
-        // Almacenar clientes para el join()
+                
         ArrayList<ClientesEmisores> clientes = new ArrayList<>(); 
         
-        // Clientes Emisores
         for (int i = 0; i < numClientes; i++) {
             ClientesEmisores cliente = new ClientesEmisores(i + 1, numMensajesPorCliente, buzonEntrada);
             clientes.add(cliente);
             cliente.start();
         }
-        
-        // Filtros de Spam
+
+        ManejadorCuarentena manejador = new ManejadorCuarentena(buzonCuarentena, buzonEntrega);
+        manejador.start();
+
         for (int i = 0; i < numFiltros; i++) {
-            new FiltrosSpam(buzonEntrada, buzonCuarentena, buzonEntrega, numClientes, numServidores).start();
+            new FiltrosSpam(buzonEntrada, buzonCuarentena, buzonEntrega, numClientes, numServidores, manejador).start();
         }
 
-        // Manejador Cuarentena (solo uno)
-        new ManejadorCuarentena(buzonCuarentena, buzonEntrega).start();
-
-        // Servidores de Entrega
         for (int i = 0; i < numServidores; i++) {
             new ServidoresEntrega(buzonEntrega).start();
         }
 
-        // --- 5. Espera a la Terminación de Clientes (Join) ---
-        // El Main thread espera a que todos los Clientes Emisores terminen de enviar sus correos
+        
         for (ClientesEmisores cliente : clientes) {
             try {
                 cliente.join();
@@ -85,7 +77,6 @@ public class Main {
             }
         }
         
-        // Al terminar el join, la cadena de terminación (con los correos finales) se disparará automáticamente.
         System.out.println("=== TODOS LOS CLIENTES HAN TERMINADO. ESPERANDO EL CIERRE DE LOS CONSUMIDORES ===");
     }
 }

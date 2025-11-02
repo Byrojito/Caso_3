@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Random;
 public class ServidoresEntrega extends Thread {
     private BuzonEntrega buzonEntrega;
     private ArrayList<Correo> correos = new ArrayList<>();
@@ -10,7 +11,6 @@ public class ServidoresEntrega extends Thread {
     public void run(){
         while(true){
             Correo c = buzonEntrega.recibirCorreo();
-            // MODIFICAR esta condición
             if(c.getId().equals("FIN")){ // Solo terminar con el FIN artificial
                 System.out.println("=== Servidor de entrega finalizado ===");
                 return;
@@ -26,5 +26,11 @@ public class ServidoresEntrega extends Thread {
     public void leerCorreo(Correo correo){
         correos.add(correo);
         System.out.println("Servidor leyó: " + correo.getId());
+        
+        try {
+            Thread.sleep(new Random().nextInt(100) + 50); // Entre 50-150ms
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

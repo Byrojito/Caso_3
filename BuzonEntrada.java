@@ -3,16 +3,14 @@ import java.util.ArrayList;
 public class BuzonEntrada {
     private int capacidad;
     private ArrayList<Correo> buzon = new ArrayList<>();
-    private boolean produccionTerminada = false; // AÑADIR esta variable
-
+    private boolean produccionTerminada = false; 
     public BuzonEntrada(int capacidad){
         this.capacidad = capacidad;
     }
 
-    // AÑADIR este método
     public synchronized void terminarProduccion() {
         this.produccionTerminada = true;
-        notifyAll(); // Despertar a todos los hilos esperando
+        notifyAll(); 
     }
 
     public synchronized void enviarCorreo(Correo correo){
@@ -27,7 +25,6 @@ public class BuzonEntrada {
     }
 
     public synchronized Correo analizarSpam(){
-        // MODIFICAR esta condición
         while(buzon.size() == 0 && !produccionTerminada){
             try {
                 wait();
@@ -35,7 +32,6 @@ public class BuzonEntrada {
             }
         }
         
-        // AÑADIR esta verificación
         if (buzon.size() == 0 && produccionTerminada) {
             return null; // Señal para terminar
         }

@@ -8,20 +8,21 @@ public class FiltrosSpam extends Thread {
     private int numClientesEmisores;
     private int numServidoresEmisores;
     private static int finClientesRecibidos = 0;
+    private ManejadorCuarentena manejador;
 
-    public FiltrosSpam(BuzonEntrada buzonEntrada,BuzonCuarentena buzonCuarentena, BuzonEntrega buzonEntrega, int numClientesEmisores, int numServidoresEmisores){
+    public FiltrosSpam(BuzonEntrada buzonEntrada,BuzonCuarentena buzonCuarentena, BuzonEntrega buzonEntrega, int numClientesEmisores, int numServidoresEmisores, ManejadorCuarentena manejador){
         this.numServidoresEmisores = numServidoresEmisores;
         this.numClientesEmisores = numClientesEmisores;
         this.buzonCuarentena = buzonCuarentena;
         this.buzonEntrega = buzonEntrega;
         this.buzonEntrada = buzonEntrada;
+        this.manejador = manejador;
     }
 
     public void run(){
         while(true){
             Correo correo = buzonEntrada.analizarSpam();
             
-            // AÑADIR esta verificación
             if (correo == null) {
                 System.out.println("=== Filtro Spam - finalizado (no hay más correos) ===");
                 return;
@@ -47,7 +48,7 @@ public class FiltrosSpam extends Thread {
                 if(soyElResponsableDeCerrar) {
                     System.out.println("--- Filtro Responsable: Esperando a que BuzonCuarentena se vacíe...");
                     
-                    while (buzonCuarentena.getSize() > 0) {
+                    while (buzonCuarentena.getSize() > 0 || manejador.estaProcesando()) {
                         Thread.yield(); 
                     }
 
@@ -60,14 +61,14 @@ public class FiltrosSpam extends Thread {
                     }
                     
                     buzonCuarentena.enviarCorreoSpam(fin);
-                    buzonEntrada.terminarProduccion(); // AÑADIR esta línea
+                    buzonEntrada.terminarProduccion(); 
                 }
                 
             } else if(correo.getflagSpam() == false){
                 buzonEntrega.enviarCorreo(correo);
 
             } else{
-                int t = rand.nextInt(11)+10; 
+                int t = rand.nextInt(10001)+10000; 
                 correo.setcuarentenaTiempo(t);
                 buzonCuarentena.enviarCorreoSpam(correo);
             }

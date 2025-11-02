@@ -17,10 +17,11 @@ public class BuzonEntrega {
                     return; 
                 }
             }
-            Thread.yield(); // AÑADIR yield para espera semi-activa
+            Thread.yield(); //  yield para espera semi-activa
         }
     }
 
+    // espera activa
     public Correo recibirCorreo(){
         Correo c = null;
         while(c == null) {
@@ -28,10 +29,6 @@ public class BuzonEntrega {
                 if (buzonEntrega.size() > 0) {
                     c = buzonEntrega.remove(0);
                 }
-            }
-            // AÑADIR yield para espera semi-activa
-            if (c == null) {
-                Thread.yield();
             }
         }
         return c;
