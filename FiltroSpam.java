@@ -13,7 +13,6 @@ public class FiltroSpam extends Thread {
         this.buzonCuarentena = buzonCuarentena;
         this.buzonEntrega = buzonEntrega;
         this.numClientes = numClientes;
-        this.setName(Thread.currentThread().getName()); 
     }
 
     @Override
@@ -22,29 +21,31 @@ public class FiltroSpam extends Thread {
             boolean debeContinuar = true;
             while (debeContinuar) {
                 Correo correo = buzonEntrada.consumir();
-                System.out.println(Thread.currentThread().getName() + ": RECIBIDO " + correo.getId());
+                System.out.println(Main.getLogTime() + Thread.currentThread().getName() + ": RECIBIDO " + correo.getId());
                 
                 if (correo.Cofinal()) {
                     synchronized (lockFin) {
                         finesRecibidosGlobal++;
-                        System.out.println(Thread.currentThread().getName() + ": FIN RECIBIDO. Total fines: " + finesRecibidosGlobal);
+                        System.out.println(Main.getLogTime() + Thread.currentThread().getName() + ": FIN RECIBIDO. Total fines: " + finesRecibidosGlobal);
+                        
                         if (finesRecibidosGlobal == numClientes) {
                             debeContinuar = false;
+                            
                             Correo finCuarentena = new Correo("FIN-Cuarentena", false, false, true, 0);
                             buzonCuarentena.depositar(finCuarentena);
-                            System.out.println(Thread.currentThread().getName() + ": ENVIADO FIN A CUARENTENA");
+                            System.out.println(Main.getLogTime() + Thread.currentThread().getName() + ": ENVIADO FIN A CUARENTENA");
                         }
                     }
                 } else if (!correo.coIncial() && correo.getflagSpam()) {
                     Random rand = new Random();
                     correo.setcuarentenaTiempo(rand.nextInt(10001) + 10000); 
                     buzonCuarentena.depositar(correo);
-                    System.out.println(Thread.currentThread().getName() + ": CORREO " + correo.getId() + " ENVIADO A CUARENTENA. T: " + correo.getcuarentenaTiempo());
+                    System.out.println(Main.getLogTime() + Thread.currentThread().getName() + ": CORREO " + correo.getId() + " ENVIADO A CUARENTENA. T: " + correo.getcuarentenaTiempo());
                 } else if (!correo.coIncial()) {
                     while (true) {
                         try {
                             buzonEntrega.depositar(correo);
-                            System.out.println(Thread.currentThread().getName() + ": CORREO " + correo.getId() + " ENVIADO A ENTREGA");
+                            System.out.println(Main.getLogTime() + Thread.currentThread().getName() + ": CORREO " + correo.getId() + " ENVIADO A ENTREGA");
                             break;
                         } catch (InterruptedException e) {
                             Thread.yield();

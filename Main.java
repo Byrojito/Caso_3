@@ -5,6 +5,12 @@ import java.util.ArrayList;
 
 public class Main {
 
+    private static long startTime;
+
+    public static String getLogTime() {
+        long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+        return String.format("[%d s] ", elapsed);
+    }
     public static void main(String[] args) {
         
         int NUM_CLIENTES = 0;
@@ -13,9 +19,9 @@ public class Main {
         int NUM_SERVIDORES = 0;
         int CAPACIDAD_ENTRADA = 0;
         int CAPACIDAD_ENTREGA = 0;
-
         try {
             BufferedReader reader = new BufferedReader(new FileReader("config.txt"));
+            
             NUM_CLIENTES = Integer.parseInt(reader.readLine().trim());
             MENSAJES_POR_CLIENTE = Integer.parseInt(reader.readLine().trim());
             NUM_FILTROS = Integer.parseInt(reader.readLine().trim());
@@ -24,33 +30,36 @@ public class Main {
             CAPACIDAD_ENTREGA = Integer.parseInt(reader.readLine().trim());
             
             reader.close();
-            
-            System.out.println("--- INICIANDO SIMULACIÓN ---");
-            System.out.println("Clientes: " + NUM_CLIENTES + ", Mensajes/C: " + MENSAJES_POR_CLIENTE + ", Filtros: " + NUM_FILTROS + ", Servidores: " + NUM_SERVIDORES);
-            System.out.println("Cap. Entrada: " + CAPACIDAD_ENTRADA + ", Cap. Entrega: " + CAPACIDAD_ENTREGA + "\n");
-            
         } catch (IOException | NumberFormatException e) {
-            System.err.println("Error al leer config.txt o formato incorrecto. Usando valores predeterminados.");
-            e.printStackTrace();
+            System.err.println("Error al leer config.txt o formato incorrecto. Terminando.");
             return;
         }
+        startTime = System.currentTimeMillis();
+        System.out.println(getLogTime() + "--- INICIANDO SIMULACIÓN ---");
+        System.out.println(getLogTime() + "Clientes: " + NUM_CLIENTES + ", Mensajes/C: " + MENSAJES_POR_CLIENTE + ", Filtros: " + NUM_FILTROS + ", Servidores: " + NUM_SERVIDORES);
+        System.out.println(getLogTime() + "Cap. Entrada: " + CAPACIDAD_ENTRADA + ", Cap. Entrega: " + CAPACIDAD_ENTREGA + "\n");
+        
         BuzonEntrada buzonEntrada = new BuzonEntrada(CAPACIDAD_ENTRADA);
         BuzonCuarentena buzonCuarentena = new BuzonCuarentena();
         BuzonEntrega buzonEntrega = new BuzonEntrega(CAPACIDAD_ENTREGA);
 
         ArrayList<Thread> servidores = new ArrayList<>();
+        
         for (int i = 0; i < NUM_CLIENTES; i++) {
             ClienteEmisor cliente = new ClienteEmisor("C" + (i + 1), MENSAJES_POR_CLIENTE, buzonEntrada);
             cliente.start();
         }
+
         for (int i = 0; i < NUM_FILTROS; i++) {
             FiltroSpam filtro = new FiltroSpam(buzonEntrada, buzonCuarentena, buzonEntrega, NUM_CLIENTES);
             filtro.setName("Filtro-" + (i + 1)); 
             filtro.start();
         }
-        ManejadorCuarentena manejador = new ManejadorCuarentena(buzonCuarentena, buzonEntrega);
+        
+        ManejadorCuarentena manejador = new ManejadorCuarentena(buzonCuarentena, buzonEntrega, NUM_SERVIDORES);
         manejador.setName("ManejadorCuarentena");
         manejador.start();
+
         for (int i = 0; i < NUM_SERVIDORES; i++) {
             ServidorEntrega servidor = new ServidorEntrega("Servidor-" + (i + 1), buzonEntrega);
             servidor.start();
@@ -61,12 +70,12 @@ public class Main {
             for (Thread servidor : servidores) {
                  servidor.join(); 
             }
-            manejador.join();
+            manejador.join(); 
             
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
-        System.out.println("\n*** SIMULACION FINALIZADA COMPLETAMENTE ***");
+        System.out.println("\n" + getLogTime() + "*** SIMULACION FINALIZADA COMPLETAMENTE ***");
     }
 }
