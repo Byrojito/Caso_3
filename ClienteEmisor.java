@@ -16,7 +16,7 @@ public class ClienteEmisor extends Thread {
         try {
             Correo inicio = new Correo(idCliente + "-I", false, true, false, 0);
             buzonEntrada.depositar(inicio);
-            System.out.println(idCliente + ": ENVIADO INICIO " + inicio.getId()); // LOG
+            System.out.println(Main.getLogTime() + idCliente + ": ENVIADO INICIO " + inicio.getId());
 
             Random rand = new Random();
             for (int i = 1; i <= numCorreos; i++) {
@@ -25,13 +25,14 @@ public class ClienteEmisor extends Thread {
                 Correo correo = new Correo(id, isSpam, false, false, 0);
                 
                 buzonEntrada.depositar(correo);
-                System.out.println(idCliente + ": ENVIADO CORREO " + id + " (Spam: " + isSpam + ")"); // LOG
-                Thread.sleep(rand.nextInt(100)); 
+                System.out.println(Main.getLogTime() + idCliente + ": ENVIADO CORREO " + id + " (Spam: " + isSpam + ")");
+                
+                Thread.sleep(rand.nextInt(200) + 100); 
             }
 
             Correo fin = new Correo(idCliente + "-F", false, false, true, 0);
             buzonEntrada.depositar(fin);
-            System.out.println(idCliente + ": ENVIADO FIN " + fin.getId()); // LOG
+            System.out.println(Main.getLogTime() + idCliente + ": ENVIADO FIN " + fin.getId());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

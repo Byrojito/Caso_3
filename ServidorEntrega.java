@@ -18,12 +18,12 @@ public class ServidorEntrega extends Thread {
                 
                 if (correo != null) {
                     if (correo.Cofinal()) {
-                        System.out.println(idServidor + ": RECIBIDO FIN FINAL. Terminando."); 
-                        return; 
+                        System.out.println(Main.getLogTime() + idServidor + ": RECIBIDO FIN FINAL. Terminando."); 
+                        return;
                     } else if (!correo.coIncial()) {
-                        System.out.println(idServidor + ": ENTREGADO " + correo.getId()); 
+                        System.out.println(Main.getLogTime() + idServidor + ": ENTREGADO " + correo.getId()); 
                         Random rand = new Random();
-                        Thread.sleep(rand.nextInt(500) + 100); 
+                        Thread.sleep(rand.nextInt(800) + 200); 
                     }
                 } else {
                     Thread.yield();
