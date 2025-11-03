@@ -44,6 +44,7 @@ public class Main {
         BuzonEntrega buzonEntrega = new BuzonEntrega(CAPACIDAD_ENTREGA);
 
         ArrayList<Thread> servidores = new ArrayList<>();
+        ArrayList<Thread> filtros = new ArrayList<>();
         
         for (int i = 0; i < NUM_CLIENTES; i++) {
             ClienteEmisor cliente = new ClienteEmisor("C" + (i + 1), MENSAJES_POR_CLIENTE, buzonEntrada);
@@ -51,9 +52,10 @@ public class Main {
         }
 
         for (int i = 0; i < NUM_FILTROS; i++) {
-            FiltroSpam filtro = new FiltroSpam(buzonEntrada, buzonCuarentena, buzonEntrega, NUM_CLIENTES);
+            FiltroSpam filtro = new FiltroSpam(buzonEntrada, buzonCuarentena, buzonEntrega, NUM_CLIENTES, NUM_FILTROS);
             filtro.setName("Filtro-" + (i + 1)); 
             filtro.start();
+            filtros.add(filtro);
         }
         
         ManejadorCuarentena manejador = new ManejadorCuarentena(buzonCuarentena, buzonEntrega, NUM_SERVIDORES);
@@ -67,11 +69,19 @@ public class Main {
         }
         
         try {
-            for (Thread servidor : servidores) {
-                 servidor.join(); 
+            for (Thread filtro : filtros) {
+                filtro.join();
             }
-            manejador.join(); 
+            System.out.println(getLogTime() + ">>> Todos los filtros han terminado");
             
+            for (Thread servidor : servidores) {
+                servidor.join(); 
+            }
+            System.out.println(getLogTime() + ">>> Todos los servidores han terminado");
+            
+            manejador.join();
+            System.out.println(getLogTime() + ">>> Manejador ha terminado");
+       
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
