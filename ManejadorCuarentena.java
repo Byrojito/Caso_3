@@ -14,8 +14,9 @@ public class ManejadorCuarentena extends Thread{
 
 
     public void run(){
-        boolean cons = true;
-        while(cons){
+        boolean finRecibido = false;
+        
+        while(true){
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -23,16 +24,21 @@ public class ManejadorCuarentena extends Thread{
 
             int cantidadMensajes = buzonCuarentena.getSize();
             
-            for(int i = 0; i < cantidadMensajes && cons; i++){
-                synchronized(this){
+            if (finRecibido && cantidadMensajes == 0) {
+                System.out.println("=== Termino Manejador Cuarentena ===");
+                break;
+            }
+            
+            for(int i = 0; i < cantidadMensajes; i++){
+                synchronized(this) {
                     procesando = true;
                 }
-
+                
                 Correo c = buzonCuarentena.tomarCorreoCuarentena();
                 
                 if(c.Cofinal()){
-                    System.out.println("=== Termino Manejador Cuarentena ===");
-                    cons = false;
+                    finRecibido = true;  
+                    System.out.println("--- Manejador: FIN recibido, procesando mensajes restantes...");
                 } else {
                     c.discuarentenaTiempo();
                     int aleatorio = rand.nextInt(21)+1;
@@ -49,8 +55,8 @@ public class ManejadorCuarentena extends Thread{
                         buzonCuarentena.enviarCorreoSpam(c);
                     }
                 }
-
-                synchronized(this){
+                
+                synchronized(this) {
                     procesando = false;
                 }
             }
